@@ -33,3 +33,13 @@ void portal::position(const vec2 &p)
 {
     _rect->SetPosition(p);
 }
+
+float portal::rotation() const
+{
+    return _rect->GetRotation();
+}
+
+void portal::rotation(float r)
+{
+    _rect->SetRotation(r);
+}

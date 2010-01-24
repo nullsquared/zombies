@@ -7,6 +7,8 @@
 #include "renderer.hpp"
 #include "types.hpp"
 
+#include <Box2D.h>
+
 class player: public entity
 {
 
@@ -15,6 +17,8 @@ class player: public entity
         renderer &_renderer;
 
         drawablePtr _rect;
+
+        b2Body *_body;
 
         vec2 _movement;
 
@@ -27,6 +31,9 @@ class player: public entity
 
         vec2 position() const;
         void position(const vec2 &p);
+
+        float rotation() const;
+        void rotation(float r);
 
         void move(const vec2 &m);
 };

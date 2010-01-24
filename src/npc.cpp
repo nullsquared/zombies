@@ -13,7 +13,7 @@ entityPtr npc::nearestPlayer() const
         end = _world.endEntity(entity::PLAYER);
     for (; i != end; ++i)
     {
-        entityPtr ent = *i;
+        const entityPtr &ent = i->second;
         vec2 ep = ent->position();
         float dd = sqlen(ep - p);
         if (!ret || d > dd)

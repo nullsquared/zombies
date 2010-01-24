@@ -3,10 +3,13 @@
 
 #include <list>
 #include <set>
+#include <map>
 #include <utility>
 
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
+
+#include <Box2D.h>
 
 #include "tile.hpp"
 #include "types.hpp"
@@ -15,19 +18,9 @@
 
 class world
 {
-    private:
-
-        struct entityCmp
-        {
-            bool operator()(const entityPtr &a, const entityPtr &b) const
-            {
-                return a->type < b->type;
-            }
-        };
-
     public:
 
-        typedef std::multiset<entityPtr, entityCmp> entityList;
+        typedef std::multimap<entity::type_t, entityPtr> entityList;
 
         world();
         ~world();
@@ -65,7 +58,12 @@ class world
         void removedObstacle(const gridPoint &p);
         void checkObstacles();
 
+        b2World &phys() { return *_physWorld; }
+
     private:
+
+        boost::shared_ptr<b2World> _physWorld;
+        float _physAccum;
 
         struct scoredGridPoint : gridPoint
         {
@@ -78,7 +76,7 @@ class world
             bool operator ==(const gridPoint &rhs) const { return r == rhs.r && c == rhs.c; }
             bool operator <(const scoredGridPoint &rhs) const { return g + h < rhs.g + rhs.h; }
         };
-        typedef std::multiset<entityPtr, entityCmp> entityList;
+
         entityList _entities;
 
         tileGrid _grid;

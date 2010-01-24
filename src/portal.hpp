@@ -27,6 +27,9 @@ class portal: public entity
 
         vec2 position() const;
         void position(const vec2 &p);
+
+        float rotation() const;
+        void rotation(float r);
 };
 
 typedef boost::shared_ptr<portal> portalPtr;

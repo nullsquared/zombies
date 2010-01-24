@@ -24,6 +24,7 @@ class game
         tile::type_t _leftDrawing, _rightDrawing;
 
         gridPoint _mouseP() const;
+        vec2 _mousePView() const;
 
         bool _running;
         bool _drawGrid;

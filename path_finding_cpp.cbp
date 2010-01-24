@@ -22,6 +22,7 @@
 					<Add library="sfml-system-d.lib" />
 					<Add library="sfml-window-d.lib" />
 					<Add library="sfml-graphics-d.lib" />
+					<Add library="Box2d_d.lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -39,6 +40,7 @@
 					<Add library="sfml-system.lib" />
 					<Add library="sfml-window.lib" />
 					<Add library="sfml-graphics.lib" />
+					<Add library="Box2d.lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -46,13 +48,15 @@
 			<Add option="/W3" />
 			<Add option="/EHsc" />
 			<Add option="-D_SCL_SECURE_NO_WARNINGS" />
-			<Add directory="..\libs\SFML-1.4\include" />
+			<Add directory="..\libs\SFML-svn\include" />
 			<Add directory="..\libs\boost_1_39" />
+			<Add directory="..\libs\Box2D\Include" />
 		</Compiler>
 		<Linker>
 			<Add library="opengl32.lib" />
-			<Add directory="..\libs\SFML-1.4\lib\vc2008" />
+			<Add directory="..\libs\SFML-svn\lib\vc2008" />
 			<Add directory="..\libs\boost_1_39\lib" />
+			<Add directory="..\libs\Box2D\Library" />
 		</Linker>
 		<Unit filename="src\entity.cpp" />
 		<Unit filename="src\entity.hpp" />
@@ -72,8 +76,6 @@
 		<Unit filename="src\tile.cpp" />
 		<Unit filename="src\tile.hpp" />
 		<Unit filename="src\types.hpp" />
-		<Unit filename="src\unit.cpp" />
-		<Unit filename="src\unit.hpp" />
 		<Unit filename="src\world.cpp" />
 		<Unit filename="src\world.hpp" />
 		<Extensions>

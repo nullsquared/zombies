@@ -6,6 +6,8 @@
 #include "world.hpp"
 #include "types.hpp"
 
+#include "renderer.hpp"
+
 #include <iostream>
 
 #include <boost/bind.hpp>
@@ -23,7 +25,7 @@ leaderZombie::~leaderZombie()
     _renderer.removeMain(_rect);
 }
 
-bool leaderZombie::tick(float dt)
+void leaderZombie::_lookAround()
 {
     gridPoint p = gridPosition();
     // add what we can see
@@ -32,14 +34,29 @@ bool leaderZombie::tick(float dt)
     neighbors.push_back(gridPoint(p.r, p.c - 1));
     neighbors.push_back(gridPoint(p.r, p.c + 1));
     neighbors.push_back(gridPoint(p.r + 1, p.c));
+
     for (size_t i = 0; i < neighbors.size(); ++i)
     {
         gridPoint &n = neighbors[i];
-        _world.putInBounds(n);
-        _explored.insert(n);
+        if (_world.onGrid(n))
+        {
+            _explored.insert(n);
+//            drawablePtr sq(new sf::Shape(sf::Shape::Rectangle(0.0f, 0.0f, 0.8f, 0.8f, sf::Color(128, 32, 32, 128))));
+//            sq->SetPosition((float)n.c, (float)n.r);
+//            _renderer.addLate(sq);
+        }
     }
+}
 
+bool leaderZombie::tick(float dt)
+{
+    _lookAround();
+
+    gridPoint p = gridPosition();
     entityPtr target = nearestPlayer();
+    if (!target)
+        return true;
+
     gridPoint targetP = target->gridPosition();
 
     if (_path.empty() && !_findPath(p, targetP))
@@ -68,7 +85,7 @@ bool leaderZombie::tick(float dt)
     vec2 v(nextP.c + 0.5f, nextP.r + 0.5f);
 
     vec2 cv = position();
-    vec2 np = cv + normalize(v - cv) * dt * 5.0f;
+    vec2 np = cv + normalize(v - cv) * dt * 15.0f;
     position(np);
 
     if (sqlen(np - v) < 0.1)
@@ -109,5 +126,15 @@ vec2 leaderZombie::position() const
 void leaderZombie::position(const vec2 &p)
 {
     _rect->SetPosition(p);
+}
+
+float leaderZombie::rotation() const
+{
+    return _rect->GetRotation();
+}
+
+void leaderZombie::rotation(float r)
+{
+    _rect->SetRotation(r);
 }
 

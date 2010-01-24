@@ -15,9 +15,14 @@
 #include "portal.hpp"
 
 world::world():
+    _physAccum(0.0f),
     _closedC(1),
     _fillC(0)
 {
+    b2AABB size;
+    size.lowerBound.Set(-1000.0f, -1000.0f);
+    size.upperBound.Set(1000.0f, 1000.0f);
+    _physWorld.reset(new b2World(size, b2Vec2(0.0f, 0.0f), true));
 }
 
 world::~world()
@@ -91,16 +96,12 @@ bool world::onGrid(const gridPoint &p) const
 
 world::entityList::iterator world::beginEntity(entity::type_t t)
 {
-    entityPtr dummy(new dummyEntity(*this));
-    dummy->type = t;
-    return _entities.lower_bound(dummy);
+    return _entities.lower_bound(t);
 }
 
 world::entityList::iterator world::endEntity(entity::type_t t)
 {
-    entityPtr dummy(new dummyEntity(*this));
-    dummy->type = t;
-    return _entities.upper_bound(dummy);
+    return _entities.upper_bound(t);
 }
 
 void world::putInBounds(gridPoint &p) const
@@ -117,7 +118,7 @@ void world::findPath(const gridPoint &start,
                      path &thePath,
                      const world::exploreFunc_t &canExplore)
 {
-    if (canExplore && !canExplore(start) || !canExplore(finish))
+    if (canExplore && (!canExplore(start) || !canExplore(finish)))
         return;
 
     // we need to take portals into account
@@ -129,7 +130,7 @@ void world::findPath(const gridPoint &start,
         entityList::iterator end = endEntity(entity::PORTAL);
         for (; i != end; ++i)
         {
-            portalPtr p = boost::shared_static_cast<portal>(*i);
+            portalPtr p = boost::shared_static_cast<portal>(i->second);
             portals[p->gridPosition()] = p;
         }
     }
@@ -273,22 +274,34 @@ void world::loadGrid(const std::string &fn)
 
 void world::addEntity(const entityPtr &e)
 {
-    _entities.insert(e);
+    _entities.insert(entityList::value_type(e->type, e));
 }
 
 void world::removeEntity(const entityPtr &e)
 {
-    _entities.erase(_entities.find(e));
+    entityList::iterator i = beginEntity(e->type), end = endEntity(e->type);
+    while (i != end && i->second != e) ++i;
+    if (i != end) _entities.erase(i);
+//    _entities.erase(_entities.find(e));
 }
 
 void world::tick(float dt)
 {
-    for (entityList::iterator i = _entities.begin(); i != _entities.end(); )
+    std::vector<entityList::iterator> toRemove;
+    for (entityList::iterator i = _entities.begin(); i != _entities.end(); ++i)
     {
-        entityPtr &e = *i;
+        entityPtr &e = i->second;
         if (!e->tick(dt))
-            i = _entities.erase(i);
-        else
-            ++i;
+            toRemove.push_back(i);
+    }
+    BOOST_FOREACH(entityList::iterator &i, toRemove)
+        _entities.erase(i);
+
+    _physAccum += dt;
+    const float FREQ = 1.0f / 60.0f;
+    while (_physAccum >= FREQ)
+    {
+        _physWorld->Step(FREQ, 10);
+        _physAccum -= FREQ;
     }
 }

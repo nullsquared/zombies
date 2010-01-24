@@ -8,6 +8,10 @@
 
 #include <SFML/Graphics.hpp>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <gl/gl.h>
+
 #include "game.hpp"
 #include "types.hpp"
 #include "unit.hpp"
@@ -59,12 +63,15 @@ game::~game()
 
 gridPoint game::_mouseP() const
 {
-    vec2 p(_window.GetInput().GetMouseX() / (float)_window.GetWidth(),
-           _window.GetInput().GetMouseY() / (float)_window.GetHeight());
-    gridPoint ret(int(p.y * _cameraSize.y + _cameraPos.y),
-                  int(p.x * _cameraSize.x + _cameraPos.x));
+    vec2 p = _mousePView();
+    gridPoint ret(int(p.y), int(p.x));
     _world.putInBounds(ret);
     return ret;
+}
+
+vec2 game::_mousePView() const
+{
+    return _window.ConvertCoords(_window.GetInput().GetMouseX(), _window.GetInput().GetMouseY());
 }
 
 void game::_keyDown(sf::Key::Code key)
@@ -107,8 +114,8 @@ void game::_keyDown(sf::Key::Code key)
 
         case sf::Key::F8:
         {
-            sf::Image img = _window.Capture();
-            img.SaveToFile(ROOT_DIR + "screenshot.jpg");
+//            sf::Image img = _window.Capture();
+//            img.SaveToFile(ROOT_DIR + "screenshot.jpg");
         }
         break;
     }
@@ -116,9 +123,10 @@ void game::_keyDown(sf::Key::Code key)
 
 void game::_updateView()
 {
-    _view.SetFromRect(sf::FloatRect(
+    _view.Reset(sf::FloatRect(
         _cameraPos.x, _cameraPos.y,
         _cameraPos.x + _cameraSize.x, _cameraPos.y + _cameraSize.y));
+    _window.SetView(_view);
 }
 
 void game::_keyUp(sf::Key::Code key)
@@ -129,13 +137,20 @@ void game::_mouseDown(sf::Mouse::Button button)
 {
     switch (button)
     {
+        case sf::Mouse::Right:
+        {
+            leaderZombiePtr z(new leaderZombie(_world, _renderer));
+            z->position(_mousePView());
+            _world.addEntity(z);
+        }
+        break;
         case sf::Mouse::Left:
             _leftDrawing = tile::WALL;
         break;
-
-        case sf::Mouse::Right:
-            _rightDrawing = tile::PLAIN;
-        break;
+//
+//        case sf::Mouse::Right:
+//            _rightDrawing = tile::PLAIN;
+//        break;
     }
 }
 
@@ -146,10 +161,10 @@ void game::_mouseUp(sf::Mouse::Button button)
         case sf::Mouse::Left:
             _leftDrawing = tile::NUM_TYPES;
         break;
-
-        case sf::Mouse::Right:
-            _rightDrawing = tile::NUM_TYPES;
-        break;
+//
+//        case sf::Mouse::Right:
+//            _rightDrawing = tile::NUM_TYPES;
+//        break;
     }
 }
 
@@ -250,7 +265,7 @@ void game::_tick(float dt)
 
     {
         vec2 m(0.0f, 0.0f);
-        const float SPEED = 15.0f;
+        const float SPEED = 10.0f;
         if (_window.GetInput().IsKeyDown(sf::Key::A))
             m.x += dt * -SPEED;
         if (_window.GetInput().IsKeyDown(sf::Key::D))
@@ -260,6 +275,10 @@ void game::_tick(float dt)
         if (_window.GetInput().IsKeyDown(sf::Key::S))
             m.y += dt * SPEED;
         playerA->move(m);
+
+        vec2 dir = _mousePView() - playerA->position();
+        float rot = std::atan2(-dir.y, dir.x); // our coords are +Y down but atan works for +Y up
+        playerA->rotation(rot / 3.14f * 180.0f);
     }
 
     _world.tick(dt);
@@ -267,11 +286,11 @@ void game::_tick(float dt)
     // update the world view after the player has been ticked
     {
         vec2 p = playerA->position();
-        const float PAD = _cameraSize.x * 0.2f;
+        const float PAD = _cameraSize.x * 0.4f;
         _cameraPos.x = std::min(_cameraPos.x, p.x - PAD);
         _cameraPos.y = std::min(_cameraPos.y, p.y - PAD);
-        _cameraPos.x = std::max(_cameraPos.x, p.x - _cameraSize.x + 1 + PAD);
-        _cameraPos.y = std::max(_cameraPos.y, p.y - _cameraSize.y + 1 + PAD);
+        _cameraPos.x = std::max(_cameraPos.x, p.x - _cameraSize.x + PAD);
+        _cameraPos.y = std::max(_cameraPos.y, p.y - _cameraSize.y + PAD);
         _updateView();
     }
 }

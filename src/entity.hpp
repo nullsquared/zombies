@@ -29,22 +29,10 @@ class entity
         virtual bool tick(float dt) = 0;
         virtual vec2 position() const = 0;
         virtual void position(const vec2 &p) = 0;
+        virtual void rotation(float r) = 0;
+        virtual float rotation() const = 0;
         virtual gridPoint gridPosition() const;
         virtual void gridPosition(const gridPoint &gp);
-};
-
-class dummyEntity: public entity
-{
-    public:
-
-        dummyEntity(world &w):
-            entity(w)
-        {
-        }
-
-        bool tick(float dt) { return false; }
-        vec2 position() const { return vec2(0.0f, 0.0f); }
-        void position(const vec2 &p) {};
 };
 
 typedef boost::shared_ptr<entity> entityPtr;

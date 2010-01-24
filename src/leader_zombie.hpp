@@ -26,6 +26,7 @@ class leaderZombie: public npc
 
         bool _findPath(const gridPoint &start, const gridPoint &finish);
         bool _canExplore(const gridPoint &p);
+        void _lookAround();
 
     public:
 
@@ -34,6 +35,9 @@ class leaderZombie: public npc
 
         vec2 position() const;
         void position(const vec2 &p);
+
+        float rotation() const;
+        void rotation(float r);
 
         bool tick(float dt);
 };
