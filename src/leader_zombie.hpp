@@ -12,6 +12,8 @@
 #include "renderer.hpp"
 #include "npc.hpp"
 
+#include <Box2D.h>
+
 class leaderZombie: public npc
 {
     private:
@@ -19,6 +21,8 @@ class leaderZombie: public npc
         renderer &_renderer;
 
         drawablePtr _rect;
+
+        b2Body *_body;
 
         path _path;
 

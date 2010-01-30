@@ -221,6 +221,16 @@ void game::_render()
 
     if (_drawGrid)
     {
+        float oldP[16];
+        glGetFloatv(GL_PROJECTION_MATRIX, oldP);
+        float oldMV[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, oldMV);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadMatrixf(_view.GetMatrix().Get4x4Elements());
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
         glBegin(GL_LINES);
         glColor3b(0, 0, 0);
         for (int i = 1; i < gridSize.r; ++i)
@@ -235,6 +245,11 @@ void game::_render()
             glVertex2f(float(i), float(gridSize.r));
         }
         glEnd();
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadMatrixf(oldP);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadMatrixf(oldMV);
 
         {
             gridPoint gp = playerA->gridPosition();
@@ -256,7 +271,16 @@ void game::_tick(float dt)
     tilePtr &t = _world.getTile(mp);
 
     if (_leftDrawing != tile::NUM_TYPES)
+    {
         t->type = _leftDrawing;
+
+        b2BodyDef bdef;
+        b2Body *body = _world.phys().CreateBody(&bdef);
+        b2PolygonDef pdef;
+        pdef.SetAsBox(0.5f, 0.5f);
+        body->CreateShape(&pdef);
+        body->SetXForm(b2Vec2(mp.c + 0.5f, mp.r + 0.5f), 0.0f);
+    }
     if (_rightDrawing != tile::NUM_TYPES)
         t->type = _rightDrawing;
 
@@ -267,13 +291,13 @@ void game::_tick(float dt)
         vec2 m(0.0f, 0.0f);
         const float SPEED = 10.0f;
         if (_window.GetInput().IsKeyDown(sf::Key::A))
-            m.x += dt * -SPEED;
+            m.x += -SPEED;
         if (_window.GetInput().IsKeyDown(sf::Key::D))
-            m.x += dt * SPEED;
+            m.x += SPEED;
         if (_window.GetInput().IsKeyDown(sf::Key::W))
-            m.y += dt * -SPEED;
+            m.y += -SPEED;
         if (_window.GetInput().IsKeyDown(sf::Key::S))
-            m.y += dt * SPEED;
+            m.y += SPEED;
         playerA->move(m);
 
         vec2 dir = _mousePView() - playerA->position();
