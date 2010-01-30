@@ -18,10 +18,21 @@ leaderZombie::leaderZombie(world &w, renderer &r):
 {
     _rect.reset(new sf::Shape(sf::Shape::Rectangle(-0.5f, -0.5f, 0.5f, 0.5f, sf::Color(255, 32, 32))));
     _renderer.addMain(_rect);
+
+    b2BodyDef bdef;
+    bdef.isSleeping = false;
+    bdef.allowSleep = false;
+    _body = _world.phys().CreateBody(&bdef);
+    b2CircleDef pdef;
+    pdef.density = 1.0f;
+    pdef.radius = 0.5f;
+    _body->CreateShape(&pdef);
+    _body->SetMassFromShapes();
 }
 
 leaderZombie::~leaderZombie()
 {
+    _world.phys().DestroyBody(_body);
     _renderer.removeMain(_rect);
 }
 
@@ -50,6 +61,11 @@ void leaderZombie::_lookAround()
 
 bool leaderZombie::tick(float dt)
 {
+    {
+        b2Vec2 p = _body->GetPosition();
+        _rect->SetPosition(vec2(p.x, p.y));
+    }
+
     _lookAround();
 
     gridPoint p = gridPosition();
@@ -85,9 +101,10 @@ bool leaderZombie::tick(float dt)
     vec2 v(nextP.c + 0.5f, nextP.r + 0.5f);
 
     vec2 cv = position();
-    vec2 np = cv + normalize(v - cv) * dt * 15.0f;
-    position(np);
+    vec2 movement = normalize(v - cv) * 10.0f;
+    _body->SetLinearVelocity(b2Vec2(movement.x, movement.y));
 
+    vec2 np = cv + movement * dt;
     if (sqlen(np - v) < 0.1)
         _path.erase(_path.begin());
 
