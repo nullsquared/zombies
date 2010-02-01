@@ -22,7 +22,8 @@ world::world():
     b2AABB size;
     size.lowerBound.Set(-1000.0f, -1000.0f);
     size.upperBound.Set(1000.0f, 1000.0f);
-    _physWorld.reset(new b2World(size, b2Vec2(0.0f, 0.0f), true));
+    _physWorld.reset(new b2World(b2Vec2(0.0f, 0.0f), true));
+    _physWorld->SetAutoClearForces(false);
 }
 
 world::~world()
@@ -287,6 +288,28 @@ void world::removeEntity(const entityPtr &e)
 
 void world::tick(float dt)
 {
+    _physAccum += dt;
+    const float FREQ = 1.0f / 60.0f;
+    int numIters = 0;
+    while (_physAccum >= FREQ)
+    {
+        for (b2Body *b = _physWorld->GetBodyList(); b; b = b->GetNext())
+        {
+            body *actual = static_cast<body*>(b->GetUserData());
+            if (actual) actual->preStep(FREQ);
+        }
+        _physWorld->Step(FREQ, 10, 10);
+        _physWorld->ClearForces();
+        _physAccum -= FREQ;
+        numIters++;
+    }
+    if (numIters > 0)
+        for (b2Body *b = _physWorld->GetBodyList(); b; b = b->GetNext())
+        {
+            body *actual = static_cast<body*>(b->GetUserData());
+            if (actual) actual->postStep(numIters * FREQ);
+        }
+
     std::vector<entityList::iterator> toRemove;
     for (entityList::iterator i = _entities.begin(); i != _entities.end(); ++i)
     {
@@ -296,12 +319,4 @@ void world::tick(float dt)
     }
     BOOST_FOREACH(entityList::iterator &i, toRemove)
         _entities.erase(i);
-
-    _physAccum += dt;
-    const float FREQ = 1.0f / 60.0f;
-    while (_physAccum >= FREQ)
-    {
-        _physWorld->Step(FREQ, 10);
-        _physAccum -= FREQ;
-    }
 }

@@ -1,58 +1,8 @@
 #ifndef TYPES_HPP_INCLUDED
 #define TYPES_HPP_INCLUDED
 
-#include <SFML/System/Vector2.hpp>
-
 #include <vector>
 #include <utility>
-
-#include <cmath>
-
-typedef sf::Vector2f vec2;
-
-inline vec2 operator *(const vec2 &a, float f)
-{
-    return vec2(a.x * f, a.y * f);
-}
-
-inline vec2 &operator *=(vec2 &a, float f)
-{
-    a.x *= f;
-    a.y *= f;
-    return a;
-}
-
-inline vec2 operator *(const vec2 &a, const vec2 &b)
-{
-    return vec2(a.x * b.x, a.y * b.y);
-}
-
-inline vec2 &operator *=(vec2 &a, const vec2 &b)
-{
-    a.x *= b.x;
-    a.y *= b.y;
-    return a;
-}
-
-inline float dot(const vec2 &a, const vec2 &b)
-{
-    return a.x * b.x + a.y * b.y;
-}
-
-inline float sqlen(const vec2 &a)
-{
-    return dot(a, a);
-}
-
-inline float len(const vec2 &a)
-{
-    return std::sqrt(sqlen(a));
-}
-
-inline vec2 normalize(const vec2 &a)
-{
-    return a * (1.0f / len(a));
-}
 
 struct gridPoint
 {

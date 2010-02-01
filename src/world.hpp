@@ -9,7 +9,7 @@
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
 
-#include <Box2D.h>
+#include "phys.hpp"
 
 #include "tile.hpp"
 #include "types.hpp"

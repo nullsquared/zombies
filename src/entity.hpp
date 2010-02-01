@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "types.hpp"
+#include "vec2.hpp"
 
 class world;
 class entity

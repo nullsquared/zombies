@@ -50,13 +50,13 @@
 			<Add option="-D_SCL_SECURE_NO_WARNINGS" />
 			<Add directory="..\libs\SFML-svn\include" />
 			<Add directory="..\libs\boost_1_39" />
-			<Add directory="..\libs\Box2D\Include" />
+			<Add directory="..\libs\box2d-svn\Box2D" />
 		</Compiler>
 		<Linker>
 			<Add library="opengl32.lib" />
 			<Add directory="..\libs\SFML-svn\lib\vc2008" />
 			<Add directory="..\libs\boost_1_39\lib" />
-			<Add directory="..\libs\Box2D\Library" />
+			<Add directory="..\libs\box2d-svn\Box2D\lib" />
 		</Linker>
 		<Unit filename="src\entity.cpp" />
 		<Unit filename="src\entity.hpp" />
@@ -67,6 +67,8 @@
 		<Unit filename="src\main.cpp" />
 		<Unit filename="src\npc.cpp" />
 		<Unit filename="src\npc.hpp" />
+		<Unit filename="src\phys.cpp" />
+		<Unit filename="src\phys.hpp" />
 		<Unit filename="src\player.cpp" />
 		<Unit filename="src\player.hpp" />
 		<Unit filename="src\portal.cpp" />
@@ -76,6 +78,7 @@
 		<Unit filename="src\tile.cpp" />
 		<Unit filename="src\tile.hpp" />
 		<Unit filename="src\types.hpp" />
+		<Unit filename="src\vec2.hpp" />
 		<Unit filename="src\world.cpp" />
 		<Unit filename="src\world.hpp" />
 		<Extensions>

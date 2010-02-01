@@ -12,9 +12,9 @@
 #include "renderer.hpp"
 #include "npc.hpp"
 
-#include <Box2D.h>
+#include "phys.hpp"
 
-class leaderZombie: public npc
+class leaderZombie: public npc, public body
 {
     private:
 
@@ -22,9 +22,9 @@ class leaderZombie: public npc
 
         drawablePtr _rect;
 
-        b2Body *_body;
-
         path _path;
+
+        vec2 _movement;
 
         std::set<gridPoint> _explored;
 
@@ -36,6 +36,9 @@ class leaderZombie: public npc
 
         leaderZombie(world &w, renderer &r);
         ~leaderZombie();
+
+        void preStep(float dt);
+        void postStep(float dt);
 
         vec2 position() const;
         void position(const vec2 &p);

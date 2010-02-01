@@ -7,9 +7,9 @@
 #include "renderer.hpp"
 #include "types.hpp"
 
-#include <Box2D.h>
+#include "phys.hpp"
 
-class player: public entity
+class player: public entity, public body
 {
 
     private:
@@ -18,14 +18,15 @@ class player: public entity
 
         drawablePtr _rect;
 
-        b2Body *_body;
-
         vec2 _movement;
 
     public:
 
         player(world &w, renderer &r);
         ~player();
+
+        void preStep(float dt);
+        void postStep(float dt);
 
         bool tick(float dt);
 

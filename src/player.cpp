@@ -3,47 +3,47 @@
 #include "player.hpp"
 #include "world.hpp"
 
+#include "phys.hpp"
+
 player::player(world &w, renderer &r):
     entity(w),
-    _renderer(r),
-    _body(NULL)
+    body(w.phys()),
+    _renderer(r)
 {
     type = PLAYER;
 
     _rect.reset(new sf::Shape(sf::Shape::Rectangle(-0.5f, -0.5f, 0.5f, 0.5f, sf::Color(128, 128, 128))));
     _renderer.addMain(_rect);
 
-    b2BodyDef bdef;
-    bdef.isSleeping = false;
-    bdef.allowSleep = false;
-    _body = _world.phys().CreateBody(&bdef);
-    b2CircleDef pdef;
-    pdef.density = 1.0f;
-    pdef.radius = 0.5f;
-    _body->CreateShape(&pdef);
-    _body->SetMassFromShapes();
+    b2CircleShape shape;
+    shape.m_radius = 0.5f;
+    shape.m_type = b2Shape::e_circle;
+    _body->CreateFixture(&shape, 1.0f);
 }
 
 player::~player()
 {
-    _world.phys().DestroyBody(_body);
     _renderer.removeMain(_rect);
+}
+
+void player::postStep(float dt)
+{
+    // explicit vec2 conversion is necessary
+    _rect->SetPosition(vec2(_body->GetPosition()));
+}
+
+void player::preStep(float dt)
+{
+    vec2 curVel = _body->GetLinearVelocity();
+    vec2 desiredVel = _movement;
+    vec2 accel = desiredVel - curVel;
+    vec2 force = accel * _body->GetMass();
+    _body->ApplyForce(force / dt, _body->GetWorldCenter());
 }
 
 bool player::tick(float dt)
 {
-    {
-        b2Vec2 p = _body->GetPosition();
-        _rect->SetPosition(vec2(p.x, p.y));
-    }
-
-//    vec2 p = position();
-//    p += _movement * dt;
-////    _rect->SetPosition(p);
-//    position(p);
-
-    _body->SetLinearVelocity(b2Vec2(_movement.x, _movement.y));
-
+    // clear movement vector
     _movement = vec2(0.0f, 0.0f);
 
     return true;
@@ -61,7 +61,7 @@ vec2 player::position() const
 
 void player::position(const vec2 &p)
 {
-    _body->SetXForm(b2Vec2(p.x, p.y), 0);
+    _body->SetTransform(p, 0);
     _rect->SetPosition(p);
 }
 

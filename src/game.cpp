@@ -274,12 +274,12 @@ void game::_tick(float dt)
     {
         t->type = _leftDrawing;
 
-        b2BodyDef bdef;
-        b2Body *body = _world.phys().CreateBody(&bdef);
-        b2PolygonDef pdef;
-        pdef.SetAsBox(0.5f, 0.5f);
-        body->CreateShape(&pdef);
-        body->SetXForm(b2Vec2(mp.c + 0.5f, mp.r + 0.5f), 0.0f);
+//        b2BodyDef bdef;
+//        b2Body *body = _world.phys().CreateBody(&bdef);
+//        b2PolygonDef pdef;
+//        pdef.SetAsBox(0.5f, 0.5f);
+//        body->CreateShape(&pdef);
+//        body->SetXForm(b2Vec2(mp.c + 0.5f, mp.r + 0.5f), 0.0f);
     }
     if (_rightDrawing != tile::NUM_TYPES)
         t->type = _rightDrawing;

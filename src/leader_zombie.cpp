@@ -14,26 +14,37 @@
 
 leaderZombie::leaderZombie(world &w, renderer &r):
     npc(w),
-    _renderer(r)
+    body(w.phys()),
+    _renderer(r),
+    _movement(0.0f, 0.0f)
 {
     _rect.reset(new sf::Shape(sf::Shape::Rectangle(-0.5f, -0.5f, 0.5f, 0.5f, sf::Color(255, 32, 32))));
     _renderer.addMain(_rect);
 
-    b2BodyDef bdef;
-    bdef.isSleeping = false;
-    bdef.allowSleep = false;
-    _body = _world.phys().CreateBody(&bdef);
-    b2CircleDef pdef;
-    pdef.density = 1.0f;
-    pdef.radius = 0.5f;
-    _body->CreateShape(&pdef);
-    _body->SetMassFromShapes();
+    b2CircleShape shape;
+    shape.m_radius = 0.5f;
+    shape.m_type = b2Shape::e_circle;
+    _body->CreateFixture(&shape, 1.0f);
 }
 
 leaderZombie::~leaderZombie()
 {
-    _world.phys().DestroyBody(_body);
     _renderer.removeMain(_rect);
+}
+
+void leaderZombie::postStep(float dt)
+{
+    // explicit vec2 conversion is necessary
+    _rect->SetPosition(vec2(_body->GetPosition()));
+}
+
+void leaderZombie::preStep(float dt)
+{
+    vec2 curVel = _body->GetLinearVelocity();
+    vec2 desiredVel = _movement;
+    vec2 accel = desiredVel - curVel;
+    vec2 force = accel * _body->GetMass();
+//    _body->ApplyForce(force / dt, _body->GetWorldCenter());
 }
 
 void leaderZombie::_lookAround()
@@ -61,11 +72,6 @@ void leaderZombie::_lookAround()
 
 bool leaderZombie::tick(float dt)
 {
-    {
-        b2Vec2 p = _body->GetPosition();
-        _rect->SetPosition(vec2(p.x, p.y));
-    }
-
     _lookAround();
 
     gridPoint p = gridPosition();
@@ -101,10 +107,9 @@ bool leaderZombie::tick(float dt)
     vec2 v(nextP.c + 0.5f, nextP.r + 0.5f);
 
     vec2 cv = position();
-    vec2 movement = normalize(v - cv) * 10.0f;
-    _body->SetLinearVelocity(b2Vec2(movement.x, movement.y));
+    _movement = normalize(v - cv) * 10.0f;
 
-    vec2 np = cv + movement * dt;
+    vec2 np = cv + _movement * dt;
     if (sqlen(np - v) < 0.1)
         _path.erase(_path.begin());
 
